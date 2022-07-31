@@ -1,0 +1,37 @@
+//module name and ports declarations
+module Decoder_Unit (
+
+input wire [1:0]	alu_fun,
+output reg 			arith_enable,
+output reg 			logic_enable,
+output reg 			cmp_enable,
+output reg 			shift_enable	);
+
+//RTL Code
+always @(*) // if it is still combinational we have to make sure the input still stable 
+			// to the edge of the next unit or it will produce the enable and the next
+			//  unit produce it is o/p but not appear on the o/p as it registerd. 
+begin
+
+arith_enable = 0;
+logic_enable = 0;
+cmp_enable   = 0;
+shift_enable = 0;
+
+ case (alu_fun)
+
+   
+   2'b00 : arith_enable = 1'b1 ;
+   2'b01 : logic_enable = 1'b1 ;
+   2'b10 : cmp_enable   = 1'b1 ;
+   2'b11 : shift_enable = 1'b1 ;
+   default :   begin
+				arith_enable = 0;
+				logic_enable = 0;
+				cmp_enable   = 0;
+				shift_enable = 0;
+			   end
+  endcase
+end
+
+endmodule

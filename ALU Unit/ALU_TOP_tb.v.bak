@@ -1,0 +1,245 @@
+`timescale 1us/1ns  //time scale changin dosen't need semi colmn it also should be in the beginning of the code
+
+
+//module name declaration
+module ALU_16bit_tb();
+
+// testcench signals declaration
+reg [15:0]	A_tb,B_tb;
+reg [3:0]	ALU_FUN_tb;
+reg			CLK_tb;
+wire [15:0]	ALU_OUT_ARITH_tb;
+wire [15:0]	ALU_OUT_LOGIC_tb;
+wire [15:0]	ALU_OUT_CMP_tb;
+wire [15:0]	ALU_OUT_SHIFT_tb;
+wire		Arith_flag_tb,Logic_flag_tb,CMP_flag_tb,Shift_flag_tb,ALU_OUT_CarryOut_tb ;
+wire [3:0]	flags;
+
+
+//clock generation
+always #5 CLK_tb <= ~ CLK_tb; //clk with frequency 100 KHz
+
+assign flags = {Arith_flag_tb,Logic_flag_tb,CMP_flag_tb,Shift_flag_tb};
+
+
+initial//it is starts at time zero
+begin
+$dumpfile("ALU_16bit_tb.vcd");  
+$dumpvars ;
+CLK_tb = 0 ;
+#3
+
+
+//________________________________________ ARITHMATIC _________________________________________________
+
+
+
+A_tb = 16'd10;
+B_tb = 16'd5;
+
+ALU_FUN_tb = 4'b0000;
+#1
+if (Arith_flag_tb == 1)
+ $display ("***********_____________0Failed________________***********\n_____________Flag is high before the operation________________");
+#5.01
+if (flags == 4'b1000 && ALU_OUT_ARITH_tb == 16'd15)
+ $display ("***********_____________1Passed________________***********\n_____________ArithmaticPassed________________***********\n_____________Arithmatic Summing done correctly________________");
+else
+ $display ("***********_____________ 1Failed ________________***********\n_____________Arithmatic Summing doesn't done correctly ________________");
+
+
+ALU_FUN_tb = 4'b0001;
+#10
+if (flags == 4'b1000 && ALU_OUT_ARITH_tb == 16'd5)
+ $display ("***********_____________2Passed________________***********\n_____________ Arithmatic Subtraction done correctly________________");
+else
+ $display ("***********_____________ 2Failed ________________***********\n_____________Arithmatic Subtraction doesn't done correctly ________________");
+
+ALU_FUN_tb = 4'b0010;
+#10
+if (flags == 4'b1000 && ALU_OUT_ARITH_tb == 16'd50)
+ $display ("***********_____________3Passed________________***********\n_____________ Arithmatic multiblication done correctly________________");
+else
+ $display ("***********_____________ 3Failed ________________***********\n_____________Arithmatic multiblication doesn't done correctly ________________");
+
+ALU_FUN_tb = 4'b0011;
+#10
+if (flags == 4'b1000 && ALU_OUT_ARITH_tb == 16'd2 )
+ $display ("***********_____________4Passed________________***********\n_____________ Arithmatic Division done correctly________________");
+else
+ $display ("***********_____________ 4Failed ________________***********\n_____________Arithmatic Division doesn't done correctly ________________");
+
+A_tb = 16'b1000000000000000;
+B_tb = 16'b1000000000000000;
+ALU_FUN_tb = 4'b0001;
+#10
+if (flags == 4'b1000 && ALU_OUT_ARITH_tb == 16'b0000000000000000  && ALU_OUT_CarryOut_tb == 1'b1)
+ $display ("***********_____________2'Passed________________***********\n_____________ Arithmatic with carry out done correctly________________");
+else
+ $display ("***********_____________ 2'Failed ________________***********\n_____________Arithmatic with carry out doesn't done correctly ________________");
+
+
+//________________________________________ LOGIC _________________________________________________
+
+A_tb = 16'b1000100000001111;
+B_tb = 16'b1000100111110000;
+
+ALU_FUN_tb = 4'b0100;
+#10
+if (flags == 4'b0100 && ALU_OUT_ARITH_tb == (A_tb & B_tb))
+ $display ("***********_____________ 5Passed________________***********\n_____________ Logic AND  done correctly________________");
+else
+ $display ("***********_____________ 5Failed ________________***********\n_____________ Logic AND  doesn't done correctly ________________");
+
+ALU_FUN_tb = 4'b0101;
+#10
+if (flags == 4'b0100 && ALU_OUT_LOGIC_tb == A_tb | B_tb)
+ $display ("***********_____________ 6Passed________________***********\n_____________ Logic OR  done correctly________________");
+else
+ $display ("***********_____________ 6Failed ________________***********\n_____________ Logic OR  doesn't done correctly ________________");
+
+ALU_FUN_tb = 4'b0110;
+#10
+if (flags == 4'b0100 && ALU_OUT_LOGIC_tb == ~(A_tb & B_tb))
+ $display ("***********_____________ 7Passed________________***********\n_____________ Logic NAND  done correctly________________");
+else
+ $display ("***********_____________ 7Failed ________________***********\n_____________ Logic NAND  doesn't done correctly ________________");
+
+ALU_FUN_tb = 4'b0111;
+#10
+if (flags == 4'b0100 && ALU_OUT_LOGIC_tb == ~(A_tb | B_tb))
+ $display ("***********_____________ 8Passed________________***********\n_____________ Logic NOR  done correctly________________");
+else
+ $display ("***********_____________ 8Failed ________________***********\n_____________ Logic NOR  doesn't done correctly ________________");
+
+/* ALU_FUN_tb = 4'b1000;
+#10
+if (flags == 4'b0100 && ALU_OUT_LOGIC_tb == (A_tb ^ B_tb))
+ $display ("***********_____________ 9Passed________________***********\n_____________ Logic XOR  done correctly________________");
+else
+ $display ("***********_____________ 9Failed ________________***********\n_____________ Logic XOR  doesn't done correctly ________________");
+
+ALU_FUN_tb = 4'b1001;
+#10
+if (flags == 4'b0100 && ALU_OUT_LOGIC_tb == ~(A_tb ^ B_tb))
+ $display ("***********_____________ 10Passed________________***********\n_____________ Logic XNOR  done correctly________________");
+else
+ $display ("***********_____________ 10Failed ________________***********\n_____________ Logic XNOR  doesn't done correctly ________________");
+ */
+//________________________________________ COMPARE _________________________________________________
+
+ALU_FUN_tb = 4'b1000;
+#10
+if (flags == 4'b0010 && ALU_OUT_CMP_tb == 16'b0 && ALU_FUN_tb == 4'b1111)
+ $display ("***********_____________ 10Passed________________***********\n_____________ CMP NO-OP  done correctly________________");
+else
+ $display ("***********_____________ 10Failed ________________***********\n_____________ CMP NO-OP  doesn't done correctly ________________");
+
+
+ALU_FUN_tb = 4'b1001;
+#10
+if (flags == 4'b0010 && ALU_OUT_CMP_tb == 16'd0)
+ $display ("***********_____________ 11Passed________________***********\n_____________ COMPARE EQL  done correctly________________");
+else
+ $display ("***********_____________ 11Failed ________________***********\n_____________ COMPARE EQL  doesn't done correctly ________________");
+
+ALU_FUN_tb = 4'b1010;
+#10
+if (flags == 4'b0010 && ALU_OUT_CMP_tb == 16'd2)
+ $display ("***********_____________ 12Passed________________***********\n_____________ COMPARE GREATER  done correctly________________");
+else
+ $display ("***********_____________ 12Failed ________________***********\n_____________ COMPARE GREATER  doesn't done correctly ________________");
+
+ALU_FUN_tb = 4'b1011;
+#10
+if (flags == 4'b0010 && ALU_OUT_CMP_tb == 16'd0)
+ $display ("***********_____________ 13Passed________________***********\n_____________ COMPARE SMALLER  done correctly________________");
+else
+ $display ("***********_____________ 13Failed ________________***********\n_____________ COMPARE SMALLER  doesn't done correctly ________________");
+
+A_tb = 16'd55;
+B_tb = 16'd55;
+ALU_FUN_tb = 4'b1001;
+#10
+if (flags == 4'b0010 && ALU_OUT_CMP_tb == 16'd1)
+ $display ("***********_____________ 14Passed________________***********\n_____________ COMPARE EQL 2  done correctly________________");
+else
+ $display ("***********_____________ 14Failed ________________***********\n_____________ COMPARE EQL 2 doesn't done correctly ________________");
+
+A_tb = 16'd10;
+B_tb = 16'd117;
+ALU_FUN_tb = 4'b1011;
+#10
+if (flags == 4'b0010 && ALU_OUT_CMP_tb == 16'd3)
+ $display ("***********_____________ 15Passed________________***********\n_____________ COMPARE SMALLER 2 done correctly________________");
+else
+ $display ("***********_____________ 15Failed ________________***********\n_____________ COMPARE SMALLER 2 doesn't done correctly ________________");
+
+A_tb = 16'd10;
+B_tb = 16'd117;
+ALU_FUN_tb = 4'b1010;
+#10
+if (flags == 4'b0010 && ALU_OUT_CMP_tb == 16'd0)
+ $display ("***********_____________ 16Passed________________***********\n_____________ COMPARE GREATER 2  done correctly________________");
+else
+ $display ("***********_____________ 16Failed ________________***********\n_____________ COMPARE GREATER 2  doesn't done correctly ________________");
+
+
+//________________________________________ SHIFT _________________________________________________
+
+
+A_tb = 16'B0000000011111111;
+ALU_FUN_tb = 4'b1100;
+#10
+if (flags == 4'b0001 && ALU_OUT_SHIFT_tb == 16'B0000000001111111)
+ $display ("***********_____________ 17Passed________________***********\n_____________ SHIFT RIGHT  done correctly________________");
+else
+ $display ("***********_____________ 17Failed ________________***********\n_____________ SHIFT RIGHT doesn't done correctly ________________");
+
+A_tb = 16'B0000000011111111;
+ALU_FUN_tb = 4'b1101;
+#10
+if (flags == 4'b0001 && ALU_OUT_SHIFT_tb == 16'B0000000111111110)
+ $display ("***********_____________ 18Passed________________***********\n_____________ SHIFT LEFT  done correctly________________");
+else
+ $display ("***********_____________ 18Failed ________________***********\n_____________ SHIFT LEFT doesn't done correctly ________________");
+B_tb = 16'B0000000011111111;
+ALU_FUN_tb = 4'b1110;
+#10
+if (flags == 4'b0001 && ALU_OUT_SHIFT_tb == 16'B0000000001111111)
+ $display ("***********_____________ 17'Passed________________***********\n_____________ SHIFT RIGHT B  done correctly________________");
+else
+ $display ("***********_____________ 17'Failed ________________***********\n_____________ SHIFT RIGHT B doesn't done correctly ________________");
+
+B_tb = 16'B0000000011111111;
+ALU_FUN_tb = 4'b1111;
+#10
+if (flags == 4'b0001 && ALU_OUT_SHIFT_tb == 16'B0000000111111110)
+ $display ("***********_____________ 18'Passed________________***********\n_____________ SHIFT LEFT B done correctly________________");
+else
+ $display ("***********_____________ 18'Failed ________________***********\n_____________ SHIFT LEFT B doesn't done correctly ________________");
+
+
+$finish;
+end
+
+ALU_TOP DUT (
+.A(A_tb),
+.B(B_tb),
+.ALU_FUN(ALU_FUN_tb),
+.CLK(CLK_tb),
+.Arith_OUT(ALU_OUT_ARITH_tb),
+.Carry_OUT(ALU_OUT_CarryOut_tb),
+.Logic_OUT(ALU_OUT_LOGIC_tb),
+.CMP_OUT(ALU_OUT_CMP_tb), 
+.Shift_OUT(ALU_OUT_SHIFT_tb),
+.Arith_Flag(Arith_flag_tb),
+.Logic_Flag(Logic_flag_tb),
+.CMP_Flag(CMP_flag_tb),
+.Shift_Flag(Shift_flag_tb) );
+
+
+endmodule
+ 
+
+
