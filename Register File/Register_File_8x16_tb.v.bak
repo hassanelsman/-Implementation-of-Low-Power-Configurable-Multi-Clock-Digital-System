@@ -1,0 +1,109 @@
+`timescale 1ns/1ps
+//module name declaration
+module Register_File_8x16_tb (); //testbench has no i/p o/p ports
+
+// internal signals declaration 
+reg	[15:0]	WrData_tb ;
+reg	[2:0]	Address_tb ;
+reg			WrEn_tb ;
+reg			RdEn_tb ;
+reg			CLK_tb ;
+reg			RST_tb ;
+wire[15:0]	RdData_tb ;
+
+
+//clock generation 
+always #5 CLK_tb  <= ~CLK_tb  ; //clock with freqency 100 MHz with duty cycle 50%
+
+
+// initial block for tracing code and report results
+initial
+begin
+ $dumpfile("Register_File_8x16_tb.vcd");  
+ $dumpvars ;
+ $monitor ("time = %8d , Address_tb = %3d , WrData_tb = %4d , RST_tb = %1b , RdData_tb = %16d", $time , Address_tb, WrData_tb, RST_tb, RdData_tb);
+ CLK_tb = 0;
+ #3
+ 
+ //Check read and reset signals
+ RST_tb = 0 ;
+ WrEn_tb = 1'b1;
+ RdEn_tb = 1'b1;
+ 
+ for (Address_tb = 3'b0; Address_tb <= 3'b111 ; Address_tb = Address_tb + 1'b1)
+  begin  
+   #10
+   if(RdData_tb == 16'b0)
+    $display ("*********** case 1 (%d) is PASSED ***********\n______________ when reset is low RdData = 0 for all addresses ______________ ",Address_tb);
+   else
+    $display ("*********** case 1 (%d) is FAILED ***********\n______________ when reset is low RdData != 0 for all addresses ______________ ",Address_tb);
+
+  end
+ 
+ RST_tb = 1; //check priority of writing 
+  
+ for (Address_tb = 3'b0; Address_tb <= 3'b111 ; Address_tb = Address_tb + 1'b1)
+  begin
+  
+   WrData_tb = Address_tb + 1'b1 ;
+   #10
+   
+   if(RdData_tb == 16'b0)
+    $display ("*********** case 2 (%d) is PASSED ***********\n______________ when WrEn is high RdData = 0 for all addresses ______________ ",Address_tb);
+   else
+    $display ("*********** case 2 (%d) is FAILED ***********\n______________ when WrEn is high RdData != 0 for all addresses ______________ ",Address_tb);
+
+  end 
+
+ WrEn_tb = 1'b0 ;
+ 
+ for (Address_tb = 3'b0; Address_tb <= 3'b111 ; Address_tb  = Address_tb + 1'b1)
+  begin
+  
+   WrData_tb = Address_tb + 16'd1 ;
+   #10
+   
+   if(RdData_tb == Address_tb + 16'd1)
+    $display ("*********** case 3 (%d) is PASSED ***********\n______________ when RdEn is high RdData is correct for all addresses ______________ ",Address_tb);
+   else
+    $display ("*********** case 3 (%d) is FAILED ***********\n______________ when RdEn is high RdData is not correct for all addresses ______________ ",Address_tb);
+
+  end 
+  
+
+//check reset is asynchronus
+ RST_tb = 1'b0 ;
+ #0.5
+ RST_tb = 1'b1 ; 
+ 
+  for (Address_tb = 3'b0; Address_tb <= 3'b111 ; Address_tb  = Address_tb + 1'b1)
+  begin  
+   #10
+   if(RdData_tb == 16'b0)
+    $display ("*********** case 4 (%d) is PASSED ***********\n______________ when reset is low for instant RdData = 0 for all addresses ______________ ",Address_tb);
+   else
+    $display ("*********** case 4 (%d) is FAILED ***********\n______________ when reset is low for instant RdData != 0 for all addresses ______________ ",Address_tb);
+  end
+
+$finish
+end
+
+
+
+  
+//module instantiation
+Register_File_8x16 DUT (
+.CLK(CLK_tb),
+.RST(RST_tb),
+.Address(Address_tb),
+.WrEn(WrEn_tb),
+.WrData(WrData_tb),
+.RdEn(RdEn_tb),
+.RdData(RdData_tb)		) ;
+
+
+endmodule
+
+
+  
+  
